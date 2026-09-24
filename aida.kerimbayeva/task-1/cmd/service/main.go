@@ -8,21 +8,33 @@ import (
 func main() {
 	var a, b, op string
 
-	fmt.Scanln(&a)
+	_, err := fmt.Scanln(&a)
+	if err != nil {
+		fmt.Println("Invalid first operand")
+		return
+	}
 	x, err := strconv.Atoi(a)
 	if err != nil {
 		fmt.Println("Invalid first operand")
 		return
 	}
 
-	fmt.Scanln(&b)
+	_, err = fmt.Scanln(&b)
+	if err != nil {
+		fmt.Println("Invalid second operand")
+		return
+	}
 	y, err := strconv.Atoi(b)
 	if err != nil {
 		fmt.Println("Invalid second operand")
 		return
 	}
 
-	fmt.Scanln(&op)
+	_, err = fmt.Scanln(&op)
+	if err != nil {
+		fmt.Println("Invalid operation")
+		return
+	}
 
 	switch op {
 	case "+":
