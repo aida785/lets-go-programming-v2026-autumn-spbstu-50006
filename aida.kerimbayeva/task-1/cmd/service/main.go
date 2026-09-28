@@ -2,29 +2,19 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 )
 
 func main() {
-	var a, b, op string
+	var x, y int
+	var op string
 
-	_, err := fmt.Scanln(&a)
-	if err != nil {
-		fmt.Println("Invalid first operand")
-		return
-	}
-	x, err := strconv.Atoi(a)
+	_, err := fmt.Scanln(&x)
 	if err != nil {
 		fmt.Println("Invalid first operand")
 		return
 	}
 
-	_, err = fmt.Scanln(&b)
-	if err != nil {
-		fmt.Println("Invalid second operand")
-		return
-	}
-	y, err := strconv.Atoi(b)
+	_, err = fmt.Scanln(&y)
 	if err != nil {
 		fmt.Println("Invalid second operand")
 		return
@@ -46,9 +36,9 @@ func main() {
 	case "/":
 		if y == 0 {
 			fmt.Println("Division by zero")
-		} else {
-			fmt.Println(x / y)
+			return
 		}
+		fmt.Println(x / y)
 	default:
 		fmt.Println("Invalid operation")
 	}
