@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,6 +12,11 @@ const (
 	minAllowedTemp = 15
 	maxAllowedTemp = 30
 	impossibleTemp = -1
+)
+
+var (
+	ErrUnknownOperator      = errors.New("unknown operator")
+	ErrUnexpectedEndOfInput = errors.New("unexpected end of input")
 )
 
 type Operator string
@@ -33,8 +39,8 @@ func NewTemperatureRange() *TemperatureRange {
 	}
 }
 
-func (tr *TemperatureRange) Apply(op Operator, value int) error {
-	switch op {
+func (tr *TemperatureRange) Apply(operator Operator, value int) error {
+	switch operator {
 	case OpGTE:
 		if value > tr.min {
 			tr.min = value
@@ -47,12 +53,14 @@ func (tr *TemperatureRange) Apply(op Operator, value int) error {
 		if value > tr.min {
 			tr.min = value
 		}
+
 		if value < tr.max {
 			tr.max = value
 		}
 	default:
-		return fmt.Errorf("unknown operator: %s", op)
+		return fmt.Errorf("%w: %s", ErrUnknownOperator, operator)
 	}
+
 	return nil
 }
 
@@ -60,16 +68,19 @@ func (tr *TemperatureRange) GetOptimal() int {
 	if tr.min > tr.max {
 		return impossibleTemp
 	}
+
 	return tr.min
 }
 
 func readToken(scanner *bufio.Scanner) (string, error) {
 	if !scanner.Scan() {
 		if err := scanner.Err(); err != nil {
-			return "", err
+			return "", fmt.Errorf("scanner error: %w", err)
 		}
-		return "", fmt.Errorf("unexpected end of input")
+
+		return "", ErrUnexpectedEndOfInput
 	}
+
 	return scanner.Text(), nil
 }
 
@@ -78,7 +89,13 @@ func readInt(scanner *bufio.Scanner) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return strconv.Atoi(token)
+
+	value, err := strconv.Atoi(token)
+	if err != nil {
+		return 0, fmt.Errorf("parse integer: %w", err)
+	}
+
+	return value, nil
 }
 
 func readOperator(scanner *bufio.Scanner) (Operator, error) {
@@ -87,12 +104,12 @@ func readOperator(scanner *bufio.Scanner) (Operator, error) {
 		return "", err
 	}
 
-	op := Operator(token)
-	switch op {
+	operator := Operator(token)
+	switch operator {
 	case OpGTE, OpLTE, OpEQ:
-		return op, nil
+		return operator, nil
 	default:
-		return "", fmt.Errorf("unknown operator: %s", op)
+		return "", fmt.Errorf("%w: %s", ErrUnknownOperator, operator)
 	}
 }
 
@@ -106,7 +123,7 @@ func main() {
 		return
 	}
 
-	for i := 0; i < departmentsCount; i++ {
+	for range departmentsCount {
 		employeesCount, err := readInt(scanner)
 		if err != nil {
 			fmt.Println("Error reading employees count:", err)
@@ -115,8 +132,8 @@ func main() {
 
 		tempRange := NewTemperatureRange()
 
-		for j := 0; j < employeesCount; j++ {
-			op, err := readOperator(scanner)
+		for range employeesCount {
+			operator, err := readOperator(scanner)
 			if err != nil {
 				fmt.Println("Error reading operator:", err)
 				return
@@ -128,7 +145,7 @@ func main() {
 				return
 			}
 
-			if err := tempRange.Apply(op, val); err != nil {
+			if err := tempRange.Apply(operator, val); err != nil {
 				fmt.Println("Error applying temperature:", err)
 				return
 			}
